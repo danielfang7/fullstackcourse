@@ -3,12 +3,15 @@ import AddPersonForm from './components/AddPersonForm'
 import SearchFilter from './components/SearchFilter'
 import PersonList from './components/PersonList'
 import personsService from './service/persons'
+import Notification from './components/Notification'
+import './index.css'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNum, setNewNum] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
+  const [notification, setNotification] = useState({ message: null, isError: false })
 
   useEffect(() => {
     console.log('effect')
@@ -28,8 +31,7 @@ const App = () => {
           setPersons(persons.filter(p => p.id !== id));
         })
         .catch(error => {
-          console.error('Error deleting the person:', error);
-          alert('There was a problem deleting the person.');
+          alert(`Information of '${person}' has already been removed from server`);
         })
     }
   }
@@ -46,9 +48,16 @@ const App = () => {
             setPersons(persons.map(p => p.id !== existingPerson.id ? p : returnedPerson))
             setNewName('') // Clear the name field
             setNewNum('')  // Clear the number field
+            setNotification({ message:`Added '${existingPerson.name}''s number to the Phonebook`, isError: false})
+            setTimeout(() => {
+              setNotification({message: null, isError: false})
+            }, 5000)
           })
           .catch(error => {
-            console.error('Error updating the person:', error)
+            setNotification({ message:`Information of '${existingPerson.name}' has already been removed from server`,  isError: true})
+            setTimeout(() => {
+              setNotification({message: null, isError: false})
+            }, 5000)
           })
       }
     } else {
@@ -62,9 +71,16 @@ const App = () => {
           setPersons(persons.concat(returnedName));
           setNewName('') // Clear the name field
           setNewNum('')  // Clear the number field
+          setNotification({ message: `Added '${returnedName.name}' to the Phonebook`, isError: false})
+          setTimeout(() => {
+            setNotification({message: null, isError: false})
+          }, 5000)
         })
         .catch(error => {
-          console.error('Error adding the person:', error)
+          setNotification({ message: `Error adding '${returnedName.name}' to the Phonebook`, isError: true})
+          setTimeout(() => {
+            setNotification({message: null, isError: false})
+          }, 5000)
         })
     }
   }
@@ -88,6 +104,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notification.message} isError={notification.isError} />
       <SearchFilter
         searchTerm={searchTerm}
         handleSearchChange={handleSearchChange}
